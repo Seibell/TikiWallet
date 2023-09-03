@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id                                            Int            @id @default(autoincrement())
+  phone_number                                  Decimal        @unique @db.Decimal
+  username                                      String         @unique
+  password                                      String
+  is_loggedin                                   Boolean?       @default(true)
+  online_balance                                Decimal?       @default(0) @db.Decimal
+  transactions_transactions_from_userToaccounts transactions[] @relation("transactions_from_userToaccounts")
+  transactions_transactions_to_userToaccounts   transactions[] @relation("transactions_to_userToaccounts")
+}
+
+model otp {
+  id         Int       @id @default(autoincrement())
+  otp        Int
+  created_on DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model transactions {
+  id                                        Int       @id @default(autoincrement())
+  from_user                                 Int
+  to_user                                   Int
+  value                                     Decimal   @db.Decimal
+  transaction_on                            DateTime? @default(now()) @db.Timestamp(6)
+  accounts_transactions_from_userToaccounts accounts  @relation("transactions_from_userToaccounts", fields: [from_user], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  accounts_transactions_to_userToaccounts   accounts  @relation("transactions_to_userToaccounts", fields: [to_user], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}

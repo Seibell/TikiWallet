@@ -11,5 +11,7 @@ coverage
 # Benchmarking
 benchmarks/graphs
 
+.env
+
 # ignore additional files using core.excludesFile
 # https://git-scm.com/docs/gitignore
