@@ -1,11 +1,25 @@
 const express = require('express');
-const app = express();
 const PORT = 3000;
 
-app.get('/', (req, res) => {
-    res.send('Hello, Express!');
-});
+const authRoutes = require('./routes/authRoutes')
+const transactionRoutes = require('./routes/transactionRoutes')
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+const app = express();
+
+app.use(express.json());
+app.use('/auth', authRoutes);
+app.use('/transaction', transactionRoutes);
+
+const startServer = async () => {
+    try {
+        app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
+        app.get('/', (req, res) => {res.send('Express server is up');});
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+startServer()
