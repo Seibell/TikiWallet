@@ -16,7 +16,7 @@ class _LoginViewState extends State<LoginView> {
   bool signup = false;
 
   Future<String?> _authUser(LoginData data) async {
-    debugPrint('Name: ${data.name}, Password: ${data.password}');
+    debugPrint('Phone: ${data.name}, Password: ${data.password}');
     return Future.delayed(loginTime).then((_) async {
       // Add try catch authentication block
       // Return string if fail authentication
