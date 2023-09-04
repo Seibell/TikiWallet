@@ -53,6 +53,15 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: FlutterLogin(
+      userValidator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your phone number';
+        }
+        if (value.length != 8 || !RegExp(r'^[0-9]+$').hasMatch(value)) {
+          return 'Please enter a valid 8-digit phone number';
+        }
+        return null;
+      },
       theme: LoginTheme(primaryColor: Color.fromARGB(255, 232, 134, 167)),
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
@@ -63,6 +72,7 @@ class _LoginViewState extends State<LoginView> {
       onRecoverPassword: _recoverPassword,
       messages: LoginMessages(
           // additionalSignUpFormDescription: 'Enter Access Code',
+          userHint: "Phone Number",
           signUpSuccess: 'Sign In Successful',
           recoverPasswordIntro: 'Enter your recovery email here',
           recoverPasswordDescription:
