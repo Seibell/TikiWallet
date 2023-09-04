@@ -1,11 +1,17 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
+require('dotenv').config();
+
+const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SSID, process.env.TWILIO_TOKEN)
+
 const prisma = new PrismaClient();
 
 const JWT_SECRET = "TikW4l13t_t0k"
 const JWT_EXPIRY = "6hr"
 const SALT = 10;
+
+const OTP_EXPIRY = 5 * 60 * 1000;   //5min in milliseconds
 
 exports.testCreateUser = async (req, res) => {
     const saltRounds = 10;
@@ -119,3 +125,98 @@ exports.register = async (req, res) => {
 }
 
 //OTP routes
+exports.sendVerification = async (req, res) => {
+    ```
+    Generates an OTP and send thru SMS
+    user submits phone number
+
+    generate 6 digit otp
+    lookup phone number in otp table
+    if exist, update the entry with new otp and created_on
+    if not exist, create a new entry with new otp
+    sends message via Twilio API to user phone with OTP
+
+    return 200
+    ```
+    const { phoneNumber } = req.body
+    const OTP = Math.floor(100000 + Math.random() * 900000)
+    //update otp in db
+    try {
+        const dbPhoneNumber = await prisma.otp.findUnique({
+            where: { phone_number: parseInt(phoneNumber) }
+        });
+        if (dbPhoneNumber) {
+            await prisma.otp.update({
+                where: { phone_number: parseInt(phoneNumber) },
+                data: {
+                    otp: OTP,
+                    created_on: new Date()
+                }
+            })
+        } else {
+            await prisma.otp.create({
+                data: {
+                    phone_number: parseInt(phoneNumber),
+                    otp: OTP,
+                }
+            })
+        }
+        const message = `Tikiwallet code: ${OTP}. Valid for 5 minutes`
+        twilio.messages
+            .create({
+                body: message,
+                from: '+12562487220',
+                to: `+65${phoneNumber}`
+            }).then(message => console.log(message.sid))
+            .catch(e => {
+                console.log(e)
+                return res.status(500).json({ error: e.message })
+            })
+    
+        return res.status(200).json({ message: "Verification sent"})
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: error.message })
+    }
+}
+
+
+exports.verify = async (req, res) => {
+    ```
+    Verifies an OTP
+    user submits phonenumber and otp
+
+    lookup otp table by phonenumber, if not exist exit
+    compare otp with db, if not same exit
+    compare created_on and time now, if not within 5min exit
+    delete the otp entry in db
+
+    return 200
+    ```
+    const { phoneNumber, otp } = req.body
+    try {
+        const dbPhone = await prisma.otp.findUnique({
+            where: { phone_number: parseInt(phoneNumber) }
+        });
+        if (!dbPhone) {
+            return res.status(404).json({ message: 'User not requesting for verification'})
+        }
+        const otpCompare = dbPhone.otp
+        if (otpCompare !== otp) {
+            return res.status(400).json({ message: 'Invalid credentials'})
+        }
+        const otpCreated = new Date(dbPhone.created_on)
+        const now = new Date()
+        if (otpCreated + OTP_EXPIRY > now) {
+            return res.status(403).json({ message: 'Expired credentials'})
+        }
+        await prisma.otp.delete({
+            where: { phone_number: parseInt(phoneNumber) }
+        })
+
+        return res.status(200).json({ message: 'OTP verified' })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: error.message })
+    }
+}
