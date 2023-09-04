@@ -50,3 +50,14 @@ exports.deleteAll = async (req, res) => {
         return res.status(500).json({ error: error.message })
     }
 }
+
+// get all OTP created
+exports.getOtps = async (req, res) => {
+    try {
+        const otps = await prisma.otp.findMany({})
+        console.log(otps)
+        return res.status(200).json(otps)
+    } catch (error) {
+        return res.status(500).json({ error: error.message })
+    }
+}
