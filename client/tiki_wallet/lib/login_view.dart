@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'home_page.dart';
 
 class LoginView extends StatefulWidget {
   LoginView({super.key});
@@ -78,7 +79,10 @@ class _LoginViewState extends State<LoginView> {
           recoverPasswordDescription:
               'An email will be sent to your email addess for password reset.'),
       onSubmitAnimationCompleted: () async {
-        // Navigate to Dashboard
+        //Navigate to dashboard_view
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => MyHomePage(),
+        ));
       },
     ));
   }

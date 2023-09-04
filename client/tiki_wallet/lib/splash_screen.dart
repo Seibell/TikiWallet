@@ -58,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.35),
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.brown),
             ),
           ],
         ),
