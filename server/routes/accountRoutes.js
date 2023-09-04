@@ -1,8 +1,10 @@
 const express = require('express');
-const { getAccount, getAllAccounts, deleteAccount, deleteAll } = require('../controller/accountController')
+const { getAccount, getAllAccounts, deleteAccount, deleteAll, getOtps } = require('../controller/accountController')
 
 const router = express.Router();
 
+// @route /account/
+router.get('/otp', getOtps);
 router.get('/:id', getAccount);
 router.get('/', getAllAccounts);
 
