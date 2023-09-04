@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'home_page.dart';
 
 class LoginView extends StatefulWidget {
   LoginView({super.key});
@@ -16,7 +17,7 @@ class _LoginViewState extends State<LoginView> {
   bool signup = false;
 
   Future<String?> _authUser(LoginData data) async {
-    debugPrint('Name: ${data.name}, Password: ${data.password}');
+    debugPrint('Phone: ${data.name}, Password: ${data.password}');
     return Future.delayed(loginTime).then((_) async {
       // Add try catch authentication block
       // Return string if fail authentication
@@ -53,6 +54,15 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: FlutterLogin(
+      userValidator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your phone number';
+        }
+        if (value.length != 8 || !RegExp(r'^[0-9]+$').hasMatch(value)) {
+          return 'Please enter a valid 8-digit phone number';
+        }
+        return null;
+      },
       theme: LoginTheme(primaryColor: Color.fromARGB(255, 232, 134, 167)),
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
@@ -63,12 +73,16 @@ class _LoginViewState extends State<LoginView> {
       onRecoverPassword: _recoverPassword,
       messages: LoginMessages(
           // additionalSignUpFormDescription: 'Enter Access Code',
+          userHint: "Phone Number",
           signUpSuccess: 'Sign In Successful',
           recoverPasswordIntro: 'Enter your recovery email here',
           recoverPasswordDescription:
               'An email will be sent to your email addess for password reset.'),
       onSubmitAnimationCompleted: () async {
-        // Navigate to Dashboard
+        //Navigate to dashboard_view
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => MyHomePage(),
+        ));
       },
     ));
   }
