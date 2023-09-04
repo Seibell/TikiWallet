@@ -9,7 +9,7 @@ datasource db {
 
 model accounts {
   id                                            Int            @id @default(autoincrement())
-  phone_number                                  Decimal        @unique @db.Decimal
+  phone_number                                  Int            @unique
   username                                      String         @unique
   password                                      String
   is_loggedin                                   Boolean?       @default(true)
@@ -19,9 +19,10 @@ model accounts {
 }
 
 model otp {
-  id         Int       @id @default(autoincrement())
-  otp        Int
-  created_on DateTime? @default(now()) @db.Timestamp(6)
+  id           Int       @id @default(autoincrement())
+  phone_number Int       @unique
+  otp          Int
+  created_on   DateTime? @default(now()) @db.Timestamp(6)
 }
 
 model transactions {
