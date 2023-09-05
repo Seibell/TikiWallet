@@ -1,3 +1,7 @@
+import 'package:tiki_wallet/login_view.dart';
+import 'package:tiki_wallet/nfc_page.dart';
+import 'package:tiki_wallet/top_up_page.dart';
+
 import 'bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -21,13 +25,31 @@ class _MyHomePageState extends State<MyHomePage> {
       children: [
         Scaffold(
           appBar: AppBar(
+            backgroundColor: Colors.brown,
             title: Text('Tiki Wallet'),
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () async {
+                  try {
+                    // Change LOGGED_IN in db to false
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginView()),
+                      (Route<dynamic> route) => false,
+                    );
+                  } catch (e) {
+                    debugPrint(e.toString());
+                  }
+                },
+              ),
+            ],
           ),
-          body: Center(
-            child: Text(
-              'placeholder for home dashboard page',
-            ),
-          ),
+          body: _currentIndex == 0
+              ? Center(child: TopUpPage())
+              : Center(
+                  child: NFCPage(),
+                ),
           bottomNavigationBar: CustomBottomNavigationBar(
             currentIndex: _currentIndex,
             onItemTapped: _onItemTapped,
