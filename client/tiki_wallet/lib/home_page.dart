@@ -6,7 +6,7 @@ import 'wallet_card.dart';
 import 'history_page.dart';
 import 'online_payment_page.dart';
 import 'offline_payment_page.dart';
-import 'api.dart';
+import 'package:tiki_wallet/services/api.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
