@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tiki_wallet/login_view.dart';
+import 'package:tiki_wallet/services/user_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await UserPreferences.init();
 
   runApp(const MaterialApp(
     title: 'Tiki Wallet',

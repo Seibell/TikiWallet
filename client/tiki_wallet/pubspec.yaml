@@ -41,6 +41,7 @@ dependencies:
     nfc_manager: ^3.3.0
     intl: ^0.18.1
     http: ^1.1.0
+    shared_preferences: ^2.2.1
 
 flutter_native_splash:
     color: "#FFFFFF" # black background
