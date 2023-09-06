@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_login: ^4.2.1
   flutter_native_splash: ^2.3.2
+  convex_bottom_bar: ^3.2.0
 
 flutter_native_splash:
   color: "#FFFFFF" # black background
