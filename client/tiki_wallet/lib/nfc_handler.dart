@@ -46,9 +46,9 @@ class NfcHandler {
                 json.decode(jsonStr) as Map<String, dynamic>;
             Transaction transaction = Transaction.fromJson(transactionData);
 
-            if (transaction.approved == true) {
-              status = "APPROVED";
-            }
+            // if (transaction.approved == true) {
+            //   status = "APPROVED";
+            // }
           }
         }
         if (!transactionFound) {

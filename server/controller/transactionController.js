@@ -36,6 +36,7 @@ exports.topUpAccount = async (req, res) => {
       data: {
         from_user: user.id,
         to_user: user.id,
+        type: "TOPUP",
         value: parsedAmount,
       },
     });
@@ -88,7 +89,8 @@ exports.withdrawFromAccount = async (req, res) => {
       data: {
         from_user: user.id,
         to_user: user.id,
-        value: -parsedAmount,
+        type: "WITHDRAWAL",
+        value: parsedAmount,
       },
     });
 
@@ -103,7 +105,7 @@ exports.withdrawFromAccount = async (req, res) => {
 };
 
 exports.onlineTransfer = async (req, res) => {
-  const { senderId, receiverId, amount } = req.body;
+  const { senderNumber, receiverNumber, amount } = req.body;
   try {
     // Validate that the amount is a positive number
     const parsedAmount = parseFloat(amount);
@@ -113,7 +115,7 @@ exports.onlineTransfer = async (req, res) => {
 
     // Find accounts
     const senderAccount = await prisma.accounts.findUnique({
-      where: { id: senderId },
+      where: { phone_number: senderNumber },
     });
 
     if (!senderAccount) {
@@ -121,7 +123,7 @@ exports.onlineTransfer = async (req, res) => {
     }
 
     const receiverAccount = await prisma.accounts.findUnique({
-      where: { id: receiverId },
+      where: { receiverNumber: receiverNumber },
     });
 
     if (!receiverAccount) {
@@ -154,19 +156,12 @@ exports.onlineTransfer = async (req, res) => {
       },
     });
 
-    // Create online transaction records
-    const senderTransaction = await prisma.transactions.create({
-      data: {
-        from_user: senderAccount.id,
-        to_user: receiverAccount.id,
-        value: -parsedAmount,
-      },
-    });
-
+    // Create online transaction record
     const receiverTransaction = await prisma.transactions.create({
       data: {
         from_user: senderAccount.id,
         to_user: receiverAccount.id,
+        type: "ONLINETRANSFER",
         value: parsedAmount,
       },
     });
@@ -175,8 +170,39 @@ exports.onlineTransfer = async (req, res) => {
       message: "Transfer successful",
       senderAccount: updatedSenderAccount,
       receiverAccount: updatedReceiverAccount,
-      senderTransaction: senderTransaction,
-      receiverTransaction: receiverTransaction,
+      transaction: receiverTransaction,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getTransactions = async (req, res) => {
+  const { accountId } = req.params;
+  try {
+    // Match accountId with from_user of transaction
+    const outgoingTransactions = await prisma.transactions.findMany({
+      where: { from_user: parseInt(accountId) },
+    });
+
+    if (!outgoingTransactions || outgoingTransactions.length === 0)
+      return res
+        .status(404)
+        .json({ message: "No outgoing transactions found" });
+
+    // Match accountId with to_user of transaction
+    const incomingTransactions = await prisma.transactions.findMany({
+      where: { to_user: parseInt(accountId) },
+    });
+
+    if (!incomingTransactions || incomingTransactions.length === 0)
+      return res
+        .status(404)
+        .json({ message: "No incoming transactions found" });
+
+    return res.status(200).json({
+      outgoingTransactions: outgoingTransactions,
+      incomingTransactions: incomingTransactions,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

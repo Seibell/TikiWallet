@@ -1,6 +1,6 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const authRoutes = require('./routes/authRoutes')
 const transactionRoutes = require('./routes/transactionRoutes')
@@ -21,7 +21,7 @@ const startServer = async () => {
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
         });
-        app.get('/', (req, res) => {res.send('Express server is up');});
+        app.get('/', (req, res) => { res.send('Express server is up'); });
 
     } catch (error) {
         console.log(error);
