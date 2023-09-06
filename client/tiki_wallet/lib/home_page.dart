@@ -6,6 +6,7 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'wallet_card.dart';
 import 'history_page.dart';
 import 'online_payment_page.dart';
+import 'offline_payment_page.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -27,7 +28,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   void _onItemTapped(int index) {
     setState(() {
-      _currentIndex = index;
+      if (index == 1) {
+        if (_tabController!.index == 0) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    OnlinePaymentPage(accountBalance: onlineWalletBalance!)),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => OfflinePaymentPage(
+                    accountBalance: offlineWalletBalance!,
+                    senderPhoneNumber: "12345678")),
+          );
+        }
+      } else {
+        _currentIndex = index;
+      }
     });
   }
 
@@ -50,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.brown,
-            title: Text('Tiki Wallet'),
+            title: const Text('Tiki Wallet'),
             actions: <Widget>[
               IconButton(
                 icon: const Icon(Icons.logout),
@@ -117,7 +137,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => NFCPage()),
+                                  builder: (context) => OfflinePaymentPage(
+                                      accountBalance: offlineWalletBalance!,
+                                      senderPhoneNumber:
+                                          "12345678")), // temp variable
                             );
                           },
                           onTopUp: () async {
@@ -138,7 +161,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       ],
                     )
               : _currentIndex == 1
-                  ? NFCPage()
+                  ? _tabController!.index == 0
+                      ? OnlinePaymentPage(accountBalance: onlineWalletBalance!)
+                      : OfflinePaymentPage(
+                          accountBalance: offlineWalletBalance!,
+                          senderPhoneNumber: "12345678")
                   : HistoryPage(),
           bottomNavigationBar: ConvexAppBar(
             backgroundColor: Colors.brown,

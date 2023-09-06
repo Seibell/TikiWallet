@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
+import 'nfc_handler.dart';
+import 'transaction.dart';
+import 'nfc_page.dart';
 
-class OnlinePaymentPage extends StatelessWidget {
+class OfflinePaymentPage extends StatelessWidget {
   final double accountBalance;
+  final String senderPhoneNumber; // taken from current_account
 
-  OnlinePaymentPage({super.key, required this.accountBalance});
+  OfflinePaymentPage(
+      {super.key,
+      required this.accountBalance,
+      required this.senderPhoneNumber});
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final NfcHandler _nfcHandler = NfcHandler();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Online Payment'),
+        title: const Text('Offline Payment'),
         backgroundColor: Colors.brown,
       ),
       body: Padding(
@@ -26,7 +34,7 @@ class OnlinePaymentPage extends StatelessWidget {
                 controller: _phoneController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Phone Number',
+                  labelText: 'Receiver Phone Number',
                   prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
@@ -59,15 +67,38 @@ class OnlinePaymentPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
-                    // some api call to send money online
+                    // Creates transaction object with approved: False to be sent to NFC
+                    Transaction transaction = Transaction(
+                      type: 'Payment',
+                      senderPhoneNumber: senderPhoneNumber,
+                      receiverPhoneNumber: _phoneController.text,
+                      transactionType: 'Offline Payment',
+                      amount: double.parse(_amountController.text),
+                      timestamp: DateTime.now(),
+                      approved: false,
+                    );
+
+                    // Writes the Transaction to the NFC card
+                    try {
+                      await _nfcHandler.writeTransactionToNfc(transaction);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Data written to NFC successfully')));
+
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              NFCPage(transaction: transaction)));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Error writing data to NFC: $e')));
+                    }
                   }
                 },
-                child: Text('Send'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.brown,
                 ),
+                child: const Text('Send'),
               ),
             ],
           ),
