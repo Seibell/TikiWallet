@@ -1,5 +1,4 @@
 import 'package:tiki_wallet/login_view.dart';
-import 'package:tiki_wallet/nfc_page.dart';
 import 'package:tiki_wallet/top_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
