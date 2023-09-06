@@ -8,8 +8,8 @@ const {
 const router = express.Router();
 
 // @route /transaction
-router.put("/topup", topUpAccount);
-router.put("/withdraw", withdrawFromAccount);
+router.put("/topup/:accountId ", topUpAccount);
+router.put("/withdraw/:accountId ", withdrawFromAccount);
 router.put("/onlineTransfer", onlineTransfer);
 
 module.exports = router;
