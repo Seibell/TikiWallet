@@ -1,38 +1,31 @@
 class Transaction {
-  String type;
+  int? id;
   String senderPhoneNumber;
   String receiverPhoneNumber;
-  String transactionType;
   double amount;
   DateTime timestamp;
-  bool approved;
 
-  Transaction(
-      {required this.type,
-      required this.senderPhoneNumber,
-      required this.receiverPhoneNumber,
-      required this.transactionType,
-      required this.amount,
-      required this.timestamp,
-      required this.approved});
+  Transaction({
+    this.id,
+    required this.senderPhoneNumber,
+    required this.receiverPhoneNumber,
+    required this.amount,
+    required this.timestamp,
+  });
 
   Map<String, dynamic> toJson() => {
-        'type': type,
+        'id': id,
         'senderPhoneNumber': senderPhoneNumber,
         'receiverPhoneNumber': receiverPhoneNumber,
-        'transactionType': transactionType,
         'amount': amount,
         'timestamp': timestamp.toIso8601String(),
-        'approved': approved,
       };
 
   factory Transaction.fromJson(Map<String, dynamic> json) => Transaction(
-        type: json['type'],
+        id: json['id'],
         senderPhoneNumber: json['senderPhoneNumber'],
         receiverPhoneNumber: json['receiverPhoneNumber'],
-        transactionType: json['transactionType'],
         amount: json['amount'],
         timestamp: DateTime.parse(json['timestamp']),
-        approved: json['approved'],
       );
 }
