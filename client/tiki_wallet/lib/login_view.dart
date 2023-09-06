@@ -36,6 +36,14 @@ class _LoginViewState extends State<LoginView> {
     });
   }
 
+  Future<String?> _genOTP(SignupData data) async {
+    // Check for whether phone number has been registered
+    return Future.delayed(loginTime).then((_) async {
+      // Use sign up data to generate OTP
+      return null;
+    });
+  }
+
   Future<String?> _recoverPassword(String name) async {
     // Check if phone number has account and email valid
     // Add try catch recover password block
@@ -67,6 +75,7 @@ class _LoginViewState extends State<LoginView> {
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
       onSignup: _signupUser,
+      onSwitchToAdditionalFields: _genOTP,
       additionalSignupFields: [
         // Additional sign up fields if needed
       ],
