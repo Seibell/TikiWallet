@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tiki_wallet/transaction.dart';
 import 'package:tiki_wallet/mock/transaction_data.dart' as mock;
 
@@ -25,14 +26,21 @@ class HistoryPage extends StatelessWidget {
                 return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
-                      var typeTransaction =
+                      String typeTransaction =
                           checkTransaction(snapshot.data![index].amount);
+                      String date = DateFormat.yMMMEd()
+                          .format(snapshot.data![index].timestamp);
                       return ListTile(
                         leading: Icon(Icons.money),
                         title: Text(
-                            "$typeTransaction ${snapshot.data![index].receiverPhoneNumber}"),
-                        subtitle:
-                            Text(snapshot.data![index].timestamp.toString()),
+                            "$typeTransaction ${snapshot.data![index].receiverPhoneNumber}",
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                          date,
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.normal),
+                        ),
                         trailing: Text(snapshot.data![index].amount.toString()),
                       );
                     });
