@@ -32,11 +32,19 @@ exports.topUpAccount = async (req, res) => {
     });
 
     // Create topup transaction record
-    /** TODO: Add code for creating transaction (after finalising schema) */
+    const topUpTransaction = await prisma.transactions.create({
+      data: {
+        from_user: user.id,
+        to_user: user.id,
+        value: parsedAmount,
+      },
+    });
 
-    return res
-      .status(200)
-      .json({ message: "Top-up successful", updatedAccount });
+    return res.status(200).json({
+      message: "Top-up successful",
+      account: updatedAccount,
+      transaction: topUpTransaction,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -76,11 +84,19 @@ exports.withdrawFromAccount = async (req, res) => {
     });
 
     // Create withdrawal transaction record
-    /** TODO: Add code for creating transaction (after finalising schema) */
+    const withdrawalTransaction = await prisma.transactions.create({
+      data: {
+        from_user: user.id,
+        to_user: user.id,
+        value: -parsedAmount,
+      },
+    });
 
-    return res
-      .status(200)
-      .json({ message: "Withdrawal successful", updatedAccount });
+    return res.status(200).json({
+      message: "Withdrawal successful",
+      account: updatedAccount,
+      transaction: withdrawalTransaction,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -139,12 +155,28 @@ exports.onlineTransfer = async (req, res) => {
     });
 
     // Create online transaction records
-    /** TODO: Add creation of transaction */
+    const senderTransaction = await prisma.transactions.create({
+      data: {
+        from_user: senderAccount.id,
+        to_user: receiverAccount.id,
+        value: -parsedAmount,
+      },
+    });
+
+    const receiverTransaction = await prisma.transactions.create({
+      data: {
+        from_user: senderAccount.id,
+        to_user: receiverAccount.id,
+        value: parsedAmount,
+      },
+    });
 
     return res.status(200).json({
       message: "Transfer successful",
       senderAccount: updatedSenderAccount,
       receiverAccount: updatedReceiverAccount,
+      senderTransaction: senderTransaction,
+      receiverTransaction: receiverTransaction,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
