@@ -1,5 +1,4 @@
 import 'package:tiki_wallet/login_view.dart';
-import 'package:tiki_wallet/nfc_page.dart';
 import 'package:tiki_wallet/top_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
@@ -7,6 +6,7 @@ import 'wallet_card.dart';
 import 'history_page.dart';
 import 'online_payment_page.dart';
 import 'offline_payment_page.dart';
+import 'package:tiki_wallet/services/api.dart';
 
 class MyHomePage extends StatefulWidget {
   @override

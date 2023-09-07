@@ -71,13 +71,10 @@ class OfflinePaymentPage extends StatelessWidget {
                   if (_formKey.currentState?.validate() ?? false) {
                     // Creates transaction object with approved: False to be sent to NFC
                     Transaction transaction = Transaction(
-                      type: 'Payment',
                       senderPhoneNumber: senderPhoneNumber,
                       receiverPhoneNumber: _phoneController.text,
-                      transactionType: 'Offline Payment',
                       amount: double.parse(_amountController.text),
                       timestamp: DateTime.now(),
-                      approved: false,
                     );
 
                     // Writes the Transaction to the NFC card
