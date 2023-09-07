@@ -175,7 +175,7 @@ exports.sendVerification = async (req, res) => {
         //     })
         const messages = await twilio.messages.create({
             body: message,
-                from: '+12562487220',
+                from: '+19365144523',
                 to: `+65${phoneNumber}`
         })
         console.log(message.sid)
@@ -202,6 +202,10 @@ exports.verify = async (req, res) => {
     
     const { phoneNumber, otp } = req.body
     try {
+        //bypass 324511 code
+        if (otp == 324511) {
+            return res.status(200).json({ message: 'OTP verified' })
+        }
         const dbPhone = await prisma.otp.findUnique({
             where: { phone_number: parseInt(phoneNumber) }
         });
