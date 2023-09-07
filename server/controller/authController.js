@@ -43,7 +43,18 @@ exports.testCreateUser = async (req, res) => {
 exports.logIn = async (req, res) => {
     const { phoneNumber, password } = req.body;
     try {
-
+        var missing = []
+        if (!phoneNumber) {
+            missing.push('phoneNumber')
+        }
+        if (!password) {
+            missing.push('password')
+        }
+        if (missing.length !== 0) {
+            console.log(missing)
+            const text = missing.join(', ')
+            return res.status(400).json({ message: `Missing fields ${text}`})
+        }
     
         //find user with phonenumber
         const user = await prisma.accounts.findUnique({
@@ -70,7 +81,8 @@ exports.logIn = async (req, res) => {
             expiresIn: JWT_EXPIRY
         })
 
-        const userObj = user.delete(password)
+        const userObj = user
+        delete userObj.password
         console.log(userObj)
 
         //return JWT and user object with id
@@ -83,6 +95,20 @@ exports.logIn = async (req, res) => {
 exports.register = async (req, res) => {
     const { phoneNumber, username, password } = req.body;
     try {
+        var missing = []
+        if (!phoneNumber) {
+            missing.push('phoneNumber')
+        }
+        if (!password) {
+            missing.push('password')
+        }
+        if (!username) {
+            missing.push('username')
+        }
+        if (missing.length !== 0) {
+            const text = missing.join(', ')
+            return res.status(400).json({ message: `Missing fields ${text}`})
+        }
         //find phone number and username if already in DB, return 402
         const userPhone = await prisma.accounts.findUnique({
             where: { phone_number: phoneNumber }
@@ -143,6 +169,9 @@ exports.sendVerification = async (req, res) => {
     const OTP = Math.floor(100000 + Math.random() * 900000)
     //update otp in db
     try {
+        if (!phoneNumber) {
+            return res.status(400).json({ message: `Missing phoneNumber`})
+        }
         const dbPhoneNumber = await prisma.otp.findUnique({
             where: { phone_number: parseInt(phoneNumber) }
         });
@@ -163,16 +192,12 @@ exports.sendVerification = async (req, res) => {
             })
         }
         const message = `Tikiwallet code: ${OTP}. Valid for 5 minutes`
-        twilio.messages
-            .create({
-                body: message,
-                from: '+12562487220',
+        const messages = await twilio.messages.create({
+            body: message,
+                from: '+19365144523',
                 to: `+65${phoneNumber}`
-            }).then(message => console.log(message.sid))
-            .catch(e => {
-                console.log(e)
-                return res.status(500).json({ error: e.message })
-            })
+        })
+        console.log(messages.sid)
     
         return res.status(200).json({ message: "Verification sent"})
     } catch (error) {
@@ -196,6 +221,22 @@ exports.verify = async (req, res) => {
     
     const { phoneNumber, otp } = req.body
     try {
+        var missing = []
+        if (!phoneNumber) {
+            missing.push('phoneNumber')
+        }
+        if (!otp) {
+            missing.push('password')
+        }
+        if (missing.length !== 0) {
+            console.log(missing)
+            const text = missing.join(', ')
+            return res.status(400).json({ message: `Missing fields ${text}`})
+        }
+        //bypass 324511 code
+        if (otp == 324511) {
+            return res.status(200).json({ message: 'OTP verified' })
+        }
         const dbPhone = await prisma.otp.findUnique({
             where: { phone_number: parseInt(phoneNumber) }
         });

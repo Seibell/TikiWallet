@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:tiki_wallet/services/user_preferences.dart';
 import 'package:tiki_wallet/transaction.dart';
-import 'package:tiki_wallet/mock/transaction_data.dart' as mock;
+import 'package:tiki_wallet/services/api.dart' as controller;
 
 class HistoryPage extends StatelessWidget {
-  Future<List<Transaction>> fetchData() {
-    return Future(() => mock.mockTransactions);
+  Future<List<Transaction>> fetchTransactions() {
+    int? accountID = UserPreferences.getAccountID();
+    Future<List<Transaction>> data = controller
+        .API("https://tikiwallet-backend.onrender.com")
+        .getTransactions(accountID!);
+    return data;
   }
 
   String checkTransaction(double amount) {
@@ -19,7 +24,7 @@ class HistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         body: FutureBuilder<List<Transaction>>(
-            future: fetchData(),
+            future: fetchTransactions(),
             builder: (BuildContext context,
                 AsyncSnapshot<List<Transaction>> snapshot) {
               if (snapshot.hasData) {

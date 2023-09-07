@@ -1,12 +1,14 @@
 import 'package:tiki_wallet/login_view.dart';
+import 'package:tiki_wallet/model/user.dart';
+import 'package:tiki_wallet/services/user_preferences.dart';
 import 'package:tiki_wallet/top_up_page.dart';
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'wallet_card.dart';
 import 'history_page.dart';
 import 'online_payment_page.dart';
+import 'package:tiki_wallet/services/api.dart' as controller;
 import 'offline_payment_page.dart';
-import 'package:tiki_wallet/services/api.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -53,12 +55,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   Future<void> fetchWalletBalance() async {
     // fake api call
-    await Future.delayed(Duration(seconds: 1));
     print("Fetching wallet balance");
+    int? id = UserPreferences.getAccountID();
+    Future<User> user = controller
+        .API("https://tikiwallet-backend.onrender.com")
+        .getAccount(id!);
+    double onlineBalance = user.then((user) => user.online_balance) as double;
 
     setState(() {
       // fake values
-      onlineWalletBalance = 100.50;
+      onlineWalletBalance = onlineBalance;
       offlineWalletBalance = 200.75;
     });
   }
