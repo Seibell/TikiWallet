@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tiki_wallet/transaction.dart';
 
 class API {
   final String baseUrl;
@@ -177,17 +179,23 @@ class API {
     }
   }
 
-  Future<Map<String, dynamic>> getTransactions(int accountId) async {
-    try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/transaction/getTransactions/$accountId'));
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'error': 'Failed to get transactions'};
-      }
-    } catch (e) {
-      return {'error': e.toString()};
+  Future<List<Transaction>> getTransactions(int accountId) async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/transaction/getTransactions/$accountId'));
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+      List<Transaction> incomingtransactions = data["incomingTransactions"]
+          .map((transaction) => Transaction.fromJson(transaction));
+      List<Transaction> outgoingtransactions = data["outgoingTransactions"]
+          .map((transaction) => Transaction.fromJson(transaction));
+      List<Transaction> result = new List.from(incomingtransactions)
+        ..addAll(outgoingtransactions);
+      return result;
+    } else {
+      const Dialog(
+        child: Text("Network Error Occured"),
+      );
+      throw Exception("Network Error");
     }
   }
 }
