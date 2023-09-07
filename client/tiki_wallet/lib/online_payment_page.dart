@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tiki_wallet/services/api.dart' as controller;
+import 'package:tiki_wallet/services/user_preferences.dart';
 
 class OnlinePaymentPage extends StatelessWidget {
   final double accountBalance;
@@ -8,6 +10,7 @@ class OnlinePaymentPage extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final int? senderNumber = UserPreferences.getContact();
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,7 @@ class OnlinePaymentPage extends StatelessWidget {
             children: [
               TextFormField(
                 controller: _phoneController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Phone Number',
                   prefixIcon: Icon(Icons.phone),
@@ -37,10 +40,10 @@ class OnlinePaymentPage extends StatelessWidget {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _amountController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Amount',
                   prefixIcon: Icon(Icons.attach_money),
@@ -61,13 +64,20 @@ class OnlinePaymentPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    // some api call to send money online
+                    Map<String, dynamic> requestBody = {
+                      "senderNumber": senderNumber!,
+                      "receiverNumber": _phoneController,
+                      "amount": _amountController,
+                    };
+                    controller
+                        .API("https://tikiwallet-backend.onrender.com")
+                        .onlineTransfer(requestBody);
                   }
                 },
-                child: Text('Send'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.brown,
                 ),
+                child: const Text('Send'),
               ),
             ],
           ),
