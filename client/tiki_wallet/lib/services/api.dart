@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tiki_wallet/model/user.dart';
 import 'package:tiki_wallet/transaction.dart';
 
 class API {
@@ -9,16 +10,15 @@ class API {
   API(this.baseUrl);
 
   // Account routes
-  Future<Map<String, dynamic>> getAccount(int id) async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/account/$id'));
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'error': 'Failed to load account'};
-      }
-    } catch (e) {
-      return {'error': e.toString()};
+  Future<User> getAccount(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/account/$id'));
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else {
+      const Dialog(
+        child: Text("Network Error Occured"),
+      );
+      throw Exception("User not found");
     }
   }
 
@@ -188,7 +188,7 @@ class API {
           .map((transaction) => Transaction.fromJson(transaction));
       List<Transaction> outgoingtransactions = data["outgoingTransactions"]
           .map((transaction) => Transaction.fromJson(transaction));
-      List<Transaction> result = new List.from(incomingtransactions)
+      List<Transaction> result = List.from(incomingtransactions)
         ..addAll(outgoingtransactions);
       return result;
     } else {
