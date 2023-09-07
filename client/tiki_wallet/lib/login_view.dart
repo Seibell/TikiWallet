@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'home_page.dart';
+import 'package:tiki_wallet/services/api.dart';
 
 class LoginView extends StatefulWidget {
   LoginView({super.key});
@@ -14,6 +15,8 @@ class _LoginViewState extends State<LoginView> {
 
   var accesscode = '';
 
+  API api = API('https://tikiwallet-backend.onrender.com/');
+
   bool signup = false;
 
   Future<String?> _authUser(LoginData data) async {
@@ -22,7 +25,34 @@ class _LoginViewState extends State<LoginView> {
       // Add try catch authentication block
       // Return string if fail authentication
       // Return null if successfully authenticated
-      return null;
+      var name = data.name;
+      var password = data.password;
+
+      // Create a data map to send in the request
+      Map<String, dynamic> requestData = {
+        'phonenumber': name,
+        'password': password,
+      };
+      try {
+        var verificationResponse = await api.login(requestData);
+        if (verificationResponse.containsKey('error')) {
+          return 'Login Failed: ${verificationResponse['error']}';
+        } else {
+          // Register User
+          var name = data.name;
+          var password = data.password;
+
+          // Create a data map to send in the request
+          Map<String, dynamic> requestData = {
+            'phonenumber': name,
+            'password': password,
+          };
+          api.register(requestData);
+          return null;
+        }
+      } catch (e) {
+        return 'Login Failed: ${e.toString()}';
+      }
     });
   }
 
@@ -32,6 +62,53 @@ class _LoginViewState extends State<LoginView> {
       // Add try catch sign up block
       // Return string if fail sign up
       // Return null if successfully signed up
+      // Check if otp is correct
+      if (data.additionalSignupData != null) {
+        var otp = data.additionalSignupData!['otp'];
+        Map<String, dynamic> otpData = {'otp': otp};
+        try {
+          var verificationResponse = await api.verify(otpData);
+
+          if (verificationResponse.containsKey('error')) {
+            return 'Failed to verify OTP: ${verificationResponse['error']}';
+          } else {
+            // Register User
+            var name = data.name;
+            var password = data.password;
+
+            // Create a data map to send in the request
+            Map<String, dynamic> requestData = {
+              'phonenumber': name,
+              'password': password,
+            };
+            api.register(requestData);
+            return null;
+          }
+        } catch (e) {
+          // Handle any exceptions that occur during verification
+          return 'Failed to verify OTP: ${e.toString()}';
+        }
+      }
+      return 'Invalid OTP';
+    });
+  }
+
+  Future<String?> _genOTP(SignupData data) async {
+    // Check for whether phone number has been registered
+    return Future.delayed(loginTime).then((_) async {
+      // Use sign up data to generate OTP
+      var name = data.name;
+      var password = data.password;
+
+      // Create a data map to send in the request
+      Map<String, dynamic> requestData = {
+        'phonenumber': name,
+        'password': password,
+      };
+
+      // Call sendVerification with the requestData
+      api.sendVerification(requestData);
+
       return null;
     });
   }
@@ -67,8 +144,11 @@ class _LoginViewState extends State<LoginView> {
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
       onSignup: _signupUser,
+      onSwitchToAdditionalFields: _genOTP,
       additionalSignupFields: [
         // Additional sign up fields if needed
+        UserFormField(
+            keyName: 'OTP', displayName: 'OTP', icon: Icon(Icons.lock))
       ],
       onRecoverPassword: _recoverPassword,
       messages: LoginMessages(
@@ -80,6 +160,7 @@ class _LoginViewState extends State<LoginView> {
               'An email will be sent to your email addess for password reset.'),
       onSubmitAnimationCompleted: () async {
         //Navigate to dashboard_view
+
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => MyHomePage(),
         ));

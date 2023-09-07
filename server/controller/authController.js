@@ -125,19 +125,20 @@ exports.register = async (req, res) => {
 }
 
 //OTP routes
+/*
+Generates an OTP and send thru SMS
+user submits phone number
+
+generate 6 digit otp
+lookup phone number in otp table
+if exist, update the entry with new otp and created_on
+if not exist, create a new entry with new otp
+sends message via Twilio API to user phone with OTP
+
+return 200
+*/
 exports.sendVerification = async (req, res) => {
-    ```
-    Generates an OTP and send thru SMS
-    user submits phone number
-
-    generate 6 digit otp
-    lookup phone number in otp table
-    if exist, update the entry with new otp and created_on
-    if not exist, create a new entry with new otp
-    sends message via Twilio API to user phone with OTP
-
-    return 200
-    ```
+    
     const { phoneNumber } = req.body
     const OTP = Math.floor(100000 + Math.random() * 900000)
     //update otp in db
@@ -180,9 +181,7 @@ exports.sendVerification = async (req, res) => {
     }
 }
 
-
-exports.verify = async (req, res) => {
-    ```
+/*
     Verifies an OTP
     user submits phonenumber and otp
 
@@ -192,7 +191,9 @@ exports.verify = async (req, res) => {
     delete the otp entry in db
 
     return 200
-    ```
+*/
+exports.verify = async (req, res) => {
+    
     const { phoneNumber, otp } = req.body
     try {
         const dbPhone = await prisma.otp.findUnique({
