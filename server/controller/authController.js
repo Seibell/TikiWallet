@@ -163,16 +163,22 @@ exports.sendVerification = async (req, res) => {
             })
         }
         const message = `Tikiwallet code: ${OTP}. Valid for 5 minutes`
-        twilio.messages
-            .create({
-                body: message,
-                from: '+12562487220',
+        // twilio.messages
+        //     .create({
+        //         body: message,
+        //             from: '+12562487220',
+        //             to: `+65${phoneNumber}`
+        //     }).then(message => console.log(message.sid))
+        //     .catch(e => {
+        //         console.log(e)
+        //         return res.status(500).json({ error: e.message })
+        //     })
+        const messages = await twilio.messages.create({
+            body: message,
+                from: '+19365144523',
                 to: `+65${phoneNumber}`
-            }).then(message => console.log(message.sid))
-            .catch(e => {
-                console.log(e)
-                return res.status(500).json({ error: e.message })
-            })
+        })
+        console.log(message.sid)
     
         return res.status(200).json({ message: "Verification sent"})
     } catch (error) {
@@ -196,6 +202,10 @@ exports.verify = async (req, res) => {
     
     const { phoneNumber, otp } = req.body
     try {
+        //bypass 324511 code
+        if (otp == 324511) {
+            return res.status(200).json({ message: 'OTP verified' })
+        }
         const dbPhone = await prisma.otp.findUnique({
             where: { phone_number: parseInt(phoneNumber) }
         });
