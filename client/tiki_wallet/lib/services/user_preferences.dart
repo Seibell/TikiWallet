@@ -16,10 +16,10 @@ class UserPreferences {
 
   static int? getAccountID() => _preferences.getInt(_keyAccountID);
 
-  static Future setContact(String contact) async =>
-      await _preferences.setString(_keyContact, contact);
+  static Future setContact(int contact) async =>
+      await _preferences.setInt(_keyContact, contact);
 
-  static String? getContact() => _preferences.getString(_keyContact);
+  static int? getContact() => _preferences.getInt(_keyContact);
 
   static Future setUsername(String username) async =>
       await _preferences.setString(_keyUsername, username);

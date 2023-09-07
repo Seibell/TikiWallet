@@ -170,11 +170,20 @@ class API {
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
+        const Dialog(
+          child: Text("Transaction successful"),
+        );
         return json.decode(response.body);
       } else {
+        Dialog(
+          child: Text(json.decode(response.body)["message"]),
+        );
         return {'error': 'Failed to transfer online'};
       }
     } catch (e) {
+      const Dialog(
+        child: Text("Network Error"),
+      );
       return {'error': e.toString()};
     }
   }
