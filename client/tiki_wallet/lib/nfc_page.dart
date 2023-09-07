@@ -79,7 +79,7 @@ class _NFCPageState extends State<NFCPage> {
   */
   Future<void> _searchForOtherDevice() async {
     try {
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 10));
       setState(() {
         _transactionStatus = "device found"; // Device found
       });

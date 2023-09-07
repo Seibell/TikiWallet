@@ -3,6 +3,8 @@ import 'nfc_handler.dart';
 import 'transaction.dart';
 import 'nfc_page.dart';
 
+import 'wifi_direct_page.dart';
+
 class OfflinePaymentPage extends StatelessWidget {
   final double accountBalance;
   final String senderPhoneNumber; // taken from current_account
@@ -96,6 +98,19 @@ class OfflinePaymentPage extends StatelessWidget {
                   backgroundColor: Colors.brown,
                 ),
                 child: const Text('Send'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => WifiDirectPage(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+                child: const Text('Go to Page'),
               ),
             ],
           ),
