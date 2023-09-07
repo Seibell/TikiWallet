@@ -1,11 +1,14 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-// TODO: Implement stripe API
-
-exports.topUpAccount = async (req, res) => {
-  const { accountId } = req.params;
-  const { amount } = req.body;
+/** CONTROLLER FUNCTION TO INITIATE A CHECKOUT SESSION
+ *
+ * @param amount amount of money IN CENTS
+ * @param currency 3 letter string e.g "usd", "sgd"
+ */
+exports.initiateTopUp = async (req, res) => {
+  const { amount, currency } = req.body;
   try {
     // Validate that the amount is a positive number
     const parsedAmount = parseFloat(amount);
@@ -13,6 +16,39 @@ exports.topUpAccount = async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
+    // Create a Stripe Checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: currency,
+            product_data: {
+              name: "Wallet Top-up",
+            },
+            unit_amount: amount * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/** CONTROLLER FUNCTION TO UPDATE DB ON OUR END AFTER SUCCESSFUL PAYMENT
+ *
+ * @param accountId id of account
+ * @param amount in dollars e.g $20.25
+ */
+exports.topUpAccount = async (req, res) => {
+  const { accountId } = req.params;
+  const { amount } = req.body;
+  try {
     // Find user's account
     const user = await prisma.accounts.findUnique({
       where: { id: parseInt(accountId) },
@@ -26,7 +62,7 @@ exports.topUpAccount = async (req, res) => {
       where: { id: user.id },
       data: {
         online_balance: {
-          increment: parsedAmount,
+          increment: amount,
         },
       },
     });
@@ -37,7 +73,7 @@ exports.topUpAccount = async (req, res) => {
         from_user: user.id,
         to_user: user.id,
         type: "TOPUP",
-        value: parsedAmount,
+        value: amount,
       },
     });
 
