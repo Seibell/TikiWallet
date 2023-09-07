@@ -81,7 +81,8 @@ exports.logIn = async (req, res) => {
             expiresIn: JWT_EXPIRY
         })
 
-        const userObj = user.delete(password)
+        const userObj = user
+        delete userObj.password
         console.log(userObj)
 
         //return JWT and user object with id
@@ -105,7 +106,6 @@ exports.register = async (req, res) => {
             missing.push('username')
         }
         if (missing.length !== 0) {
-            console.log(missing)
             const text = missing.join(', ')
             return res.status(400).json({ message: `Missing fields ${text}`})
         }
