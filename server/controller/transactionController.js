@@ -6,6 +6,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
  *
  * @param amount amount of money IN CENTS
  * @param currency 3 letter string e.g "usd", "sgd"
+ * @returns session id
  */
 exports.initiateTopUp = async (req, res) => {
   const { amount, currency } = req.body;
@@ -87,9 +88,16 @@ exports.topUpAccount = async (req, res) => {
   }
 };
 
+/** CONTROLLER FUNCTION TO WITHDRAW FUNDS FROM ACC USING STRIPE AND UPDATES DB
+ *
+ * @param accountId param to identify which acc to use, specify in route
+ * @param amount in dollars e.g 12.31
+ * @param currency e.g 'sgd'
+ * @returns json
+ */
 exports.withdrawFromAccount = async (req, res) => {
   const { accountId } = req.params;
-  const { amount } = req.body;
+  const { amount, currency } = req.body;
   try {
     // Validate that the amount is a positive number
     const parsedAmount = parseFloat(amount);
@@ -109,6 +117,12 @@ exports.withdrawFromAccount = async (req, res) => {
     if (user.online_balance < parsedAmount) {
       return res.status(400).json({ message: "Insufficient funds" });
     }
+
+    const payout = await stripe.transfers.create({
+      amount: parsedAmount * 100,
+      currency: currency,
+      destination: process.env.STRIPE_ACCOUNT_ID,
+    });
 
     // Update the online_balance
     const updatedAccount = await prisma.accounts.update({
@@ -133,6 +147,7 @@ exports.withdrawFromAccount = async (req, res) => {
     return res.status(200).json({
       message: "Withdrawal successful",
       account: updatedAccount,
+      stripePayout: payout,
       transaction: withdrawalTransaction,
     });
   } catch (error) {
@@ -140,6 +155,13 @@ exports.withdrawFromAccount = async (req, res) => {
   }
 };
 
+/** CONTROLLER FUNCTION FOR P2P ONLINE TRANSACTIONS
+ *
+ * @param senderNumber phone number of sender
+ * @param receiverNumber phone number of receiver
+ * @param amount in dollars e.g $12.50
+ * @returns json object
+ */
 exports.onlineTransfer = async (req, res) => {
   const { senderNumber, receiverNumber, amount } = req.body;
   try {
@@ -213,6 +235,11 @@ exports.onlineTransfer = async (req, res) => {
   }
 };
 
+/** CONTROLLER FUNCTION TO GET ALL TRANSACTIONS OF AN ACCOUNT
+ *
+ * @param accountId to identify which account
+ * @returns json of outgoing and incoming transactions
+ */
 exports.getTransactions = async (req, res) => {
   const { accountId } = req.params;
   try {
