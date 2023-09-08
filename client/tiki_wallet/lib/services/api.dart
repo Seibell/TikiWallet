@@ -218,7 +218,7 @@ class API {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        return {'error': 'Failed to register'};
+        return {'error': 'Failed to topup'};
       }
     } catch (e) {
       return {'error': e.toString()};
