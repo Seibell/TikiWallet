@@ -250,31 +250,27 @@ exports.onlineTransfer = async (req, res) => {
 exports.getTransactions = async (req, res) => {
   const { accountId } = req.params;
   try {
+    if (!accountId) {
+      return res.status(400).json({ message: 'accountId is missing'})
+    }
     // Match accountId with from_user of transaction
     const outgoingTransactions = await prisma.transactions.findMany({
       where: { from_user: parseInt(accountId) },
     });
 
-    if (!outgoingTransactions || outgoingTransactions.length === 0)
-      return res
-        .status(404)
-        .json({ message: "No outgoing transactions found" });
 
     // Match accountId with to_user of transaction
     const incomingTransactions = await prisma.transactions.findMany({
       where: { to_user: parseInt(accountId) },
     });
 
-    if (!incomingTransactions || incomingTransactions.length === 0)
-      return res
-        .status(404)
-        .json({ message: "No incoming transactions found" });
 
     return res.status(200).json({
       outgoingTransactions: outgoingTransactions,
       incomingTransactions: incomingTransactions,
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ error: error.message });
   }
 };
