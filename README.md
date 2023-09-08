@@ -10,10 +10,10 @@ E-wallet with offline transaction support for Tiktok hackathon 2023
     - [Tech Stack](#tech-stack)
     - [Architecture](#architecture)
 - [Features](#features)
-    - [Quests](#quests)
-    - [The Breakroom](#the-breakroom)
-    - [Pantry Pals](#pantry-pals)
-    - [Leaderboard](#leaderboard)
+    - [Authentication](#authentication)
+    - [Topups and Withdrawls](#topup-and-withdrawal)
+    - [Online Wallet](#online-wallet)
+    - [Offline Wallet](#offline-wallet)
 - [Roadmap for Scalability and Availability](#roadmap-for-scalability-and-availability)
 
 ## About
@@ -66,7 +66,7 @@ Considerations:
 *Architecture Diagram*
 
 ## Features
-### 🔒 Authentication
+### <a name="authentication"></a>🔒 Authentication
 Aim:
 - To reduce fraud and phishing using 2FA method through OTP SMS verification
 - Encrypted access to restrict access to the app by sessions through JWT
@@ -87,23 +87,23 @@ Authentication and session management is carried out using JSON Web Tokens.
 
 
 
-### 💳 Topup and Withdraw
+### <a name="topup-and-withdraw"></a>💳 Topups and Withdrawals
 Aim:
 - Utilize Stripe API to add funds from the user's bank to the wallet
 - Utilize Stripe API to retract funds from the user's wallet to the bank
 
-### 📶 Online Wallet
+###  <a name="online-wallet"></a>📶 Online Wallet
 Aim:
 - Transfer of funds between users over the internet
 
-### 📂 Offline Wallet
+###  <a name="offline-wallet"></a>📂 Offline Wallet
 Aim:
 - Transfer of funds between users without internet access
 - Physical contact between users to ensure authentication and security
 
 
 ## Roadmap for Scalability and Availability
-**Phase 1: Assessment and Planning**
+**Phase 1️⃣: Assessment and Planning**
 1. Define Objectives and Metrics
     - What level of traffic can your app handle? What is the acceptable downtime?
 2. Understand Current State
@@ -113,7 +113,7 @@ Aim:
 4. Cost Analysis
     - Estimate the budget required for implementing scalability and availability improvements. Consider cloud services, additional hardware, and software costs.
 
-**Phase 2: Architecture and Design**
+**Phase 2️⃣: Architecture and Design**
 1. Microservices Architecture
     - Auth Service
     - Transactions Service
@@ -130,7 +130,7 @@ Aim:
     - Redis to reduce database load and improve response times for information frequently accessed. Like user account balance and transaction history.
     - Store API request and response data to allow rate limiting and throttling strategies.
 
-**Phase 3: Infrastructure and Deployment**
+**Phase 3️⃣: Infrastructure and Deployment**
 1. Cloud Adoption
     - Deploy onto AWS EKS
 2. Auto-scaling
@@ -138,7 +138,7 @@ Aim:
 3. Data Replication and Backup
     - Implement data replication across multiple regions for disaster recovery and backup.
 
-**Phase 4: Monitoring and Optimization**
+**Phase 4️⃣: Monitoring and Optimization**
 1. Real-time Monitoring
     - AWS cloudwatch to track the health and performance of your application and infrastructure. Configure alarms to trigger notifications when CPU utilization, memory usage, network traffic and storage thresholds exceed. Automatically adjust number of instances based on predefined scaling policies based on cloudwatch triggers.
 2. Performance Testing
@@ -148,7 +148,7 @@ Aim:
     - Automate cluster provisioning with IaC or AWS Cloudformation to quickly recreate the cluster.
     - Third party disaster recovery services or AWS Disaster Recovery Service
 
-**Phase 5: Scaling and Growth**
+**Phase 5️⃣: Scaling and Growth**
 1. Scalability Testing
     - Conduct scalability tests to ensure increased loads can be handled especially during peak times.
 2. User Feedback
