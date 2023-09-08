@@ -8,6 +8,8 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
  * @param currency 3 letter string e.g "usd", "sgd"
  * @returns session id
  */
+const axios = require('axios'); // Import the axios library
+
 exports.initiateTopUp = async (req, res) => {
   const { amount, currency } = req.body;
   try {
@@ -17,29 +19,34 @@ exports.initiateTopUp = async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
-    // Create a Stripe Checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: currency,
-            product_data: {
-              name: "Wallet Top-up",
-            },
-            unit_amount: amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-    });
+    // Calculate the amount in cents
+    const amountInCents = Math.round(parsedAmount * 100);
 
-    res.json({ sessionId: session.id });
+    // Request body for creating a payment intent
+    const paymentIntentData = {
+      amount: amountInCents,
+      currency: currency,
+    };
+
+    // Make a POST request to create a PaymentIntent on Stripe
+    const response = await axios.post(
+      'https://api.stripe.com/v1/payment_intents',
+      paymentIntentData,
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`, // Replace with your Stripe secret key
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    // Return the PaymentIntent data to the client
+    res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 /** CONTROLLER FUNCTION TO UPDATE DB ON OUR END AFTER SUCCESSFUL PAYMENT
  *
