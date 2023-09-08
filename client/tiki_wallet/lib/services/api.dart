@@ -207,4 +207,21 @@ class API {
       throw Exception("Network Error");
     }
   }
+
+  Future<Map<String, dynamic>> initiateTopUp(Map<String, dynamic> data) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/transaction/initiateTopUp'),
+        body: json.encode(data),
+        headers: {'Content-Type': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'error': 'Failed to register'};
+      }
+    } catch (e) {
+      return {'error': e.toString()};
+    }
+  }
 }
