@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:tiki_wallet/model/user.dart';
+import 'package:tiki_wallet/services/user_preferences.dart';
 import 'home_page.dart';
 import 'package:tiki_wallet/services/api.dart';
 
@@ -38,6 +40,11 @@ class _LoginViewState extends State<LoginView> {
         return '${verificationResponse['error']}';
       } else {
         var token = verificationResponse['token'];
+        User user = User.fromJson(verificationResponse['user']);
+        UserPreferences.setToken(token);
+        UserPreferences.setAccountID(user.id);
+        UserPreferences.setContact(user.phone_number);
+        UserPreferences.setUsername(user.username);
         // Use token if needed
         return null;
       }

@@ -57,14 +57,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     // fake api call
     print("Fetching wallet balance");
     int? id = UserPreferences.getAccountID();
-    Future<User> user = controller
+    User user = await controller
         .API("https://tikiwallet-backend.onrender.com")
         .getAccount(id!);
-    double onlineBalance = user.then((user) => user.online_balance) as double;
 
     setState(() {
       // fake values
-      onlineWalletBalance = onlineBalance;
+      onlineWalletBalance = user.online_balance;
       offlineWalletBalance = 200.75;
     });
   }
