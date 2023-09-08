@@ -22,6 +22,6 @@ class User {
         id: json['id'],
         phone_number: json['phone_number'],
         username: json['username'],
-        online_balance: json['online_balance'],
+        online_balance: double.parse(json['online_balance']),
       );
 }
