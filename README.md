@@ -1,7 +1,7 @@
 # TikiWallet
 E-wallet with offline transaction support for Tiktok hackathon 2023
 
-## Table of Contents
+## 𝌞 Table of Contents
 - [About](#about)
     - [Problem Statement](#problem-statement)
     - [Motivation](#motivation)
@@ -17,22 +17,32 @@ E-wallet with offline transaction support for Tiktok hackathon 2023
 - [Roadmap for Scalability and Availability](#roadmap-for-scalability-and-availability)
 
 ## About
-### Problem Statement
+### <a name="problem-statement"></a>❓ Problem Statement
 Problem statement 4: 
 How can new technologies in digital wallets enable new and trustworthy user experiences?
 
-### Motivation
+### <a name="motivation"></a>💡 Motivation
 With the advancement of technology, underserved regions or areas have trouble keeping up with the latest trends such as the lack of a stable WiFi connection. For financial inclusivity, TikiWallet enables transactions between users with no WiFi connections at all.
 
-### Target Audience
+### <a name="target-audience"></a>🧑 Target Audience
 - The general public
 - People with no access to a stable WiFi or mobile data connection on the go
 
-### Value Proposition
+### <a name="value-proposition"></a>❗ Value Proposition
 TikiWallet partitions your wallet into 2 wallets - online and offline.
 In addition to your typical online transactions between users, users are able to send and receive transactions offline by being in contact with the receiver.
 
-### Tech Stack
+### <a name="tech-stack"></a>💻 Tech Stack
+![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
+![Render](https://img.shields.io/badge/Render-%46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-008CDD.svg?style=for-the-badge&logo=Stripe&logoColor=white)
+![Twilio](https://img.shields.io/badge/Twilio-F22F46.svg?style=for-the-badge&logo=Twilio&logoColor=white)
+
 **Client**:
 - Flutter
 
@@ -45,7 +55,7 @@ In addition to your typical online transactions between users, users are able to
 - Stripe
 - Twilio
 
-### Architecture
+### <a name="architecture"></a>🔨 Architecture
 Adopted a client-server monolithic architecture
 
 Considerations:
@@ -56,7 +66,7 @@ Considerations:
 *Architecture Diagram*
 
 ## Features
-### Authentication
+### 🔒 Authentication
 Aim:
 - To reduce fraud and phishing using 2FA method through OTP SMS verification
 - Encrypted access to restrict access to the app by sessions through JWT
@@ -77,16 +87,16 @@ Authentication and session management is carried out using JSON Web Tokens.
 
 
 
-### Topup and Withdraw
+### 💳 Topup and Withdraw
 Aim:
 - Utilize Stripe API to add funds from the user's bank to the wallet
 - Utilize Stripe API to retract funds from the user's wallet to the bank
 
-### Online Wallet
+### 📶 Online Wallet
 Aim:
 - Transfer of funds between users over the internet
 
-### Offline Wallet
+### 📂 Offline Wallet
 Aim:
 - Transfer of funds between users without internet access
 - Physical contact between users to ensure authentication and security
@@ -149,3 +159,9 @@ Aim:
 ![Scale MSA](/lib/Tikiwallet%20Scale%20MSA.jpg)
 *A brief overview of the scalability and availability plan*
 
+## ✍🏻 Contributors
+* Benjamin Toh [@bentohset](https://github.com/bentohset)
+* Muhammad Jabir [@muhdjabir](https://github.com/muhdjabir)
+* Ryan Ong [@ryanongwx](https://github.com/ryanongwx)
+* Ryan Lim [@Seibell](https://github.com/Seibell)
+* Wang Yu Teng [@WangYuTengg](https://github.com/WangYuTengg)
