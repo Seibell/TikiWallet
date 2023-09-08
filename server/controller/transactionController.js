@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRETKEY);
 
 /** CONTROLLER FUNCTION TO INITIATE A CHECKOUT SESSION
  *
@@ -29,21 +29,28 @@ exports.initiateTopUp = async (req, res) => {
     };
 
     // Make a POST request to create a PaymentIntent on Stripe
-    const response = await axios.post(
-      'https://api.stripe.com/v1/payment_intents',
-      paymentIntentData,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`, // Replace with your Stripe secret key
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
+    // const response = await axios.post(
+    //   'https://api.stripe.com/v1/payment_intents',
+    //   paymentIntentData,
+    //   {
+    //     headers: {
+    //       'Authorization': `Bearer ${process.env.STRIPE_SECRETKEY}`, // Replace with your Stripe secret key
+    //       'Content-Type': 'application/x-www-form-urlencoded',
+    //     },
+    //   }
+    // );
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amountInCents,
+      currency: currency,
+      automatic_payment_methods: {enabled: true},
+    })
 
     // Return the PaymentIntent data to the client
-    res.json(response.data);
+
+    return res.status(200).json(paymentIntent);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log(error)
+    return res.status(500).json({ error: error.message });
   }
 };
 
