@@ -11,6 +11,7 @@ class TopUpPage extends StatefulWidget {
 class _TopUpPageState extends State<TopUpPage> {
   API api = API('https://tikiwallet-backend.onrender.com');
   Map<String, dynamic>? paymentIntent;
+  TextEditingController amountController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,9 +61,9 @@ class _TopUpPageState extends State<TopUpPage> {
                 ),
               ),
             ),
-            TopUpOption(amount: '\$10'),
-            TopUpOption(amount: '\$20'),
-            TopUpOption(amount: '\$50'),
+            TopUpOption(amount: '10'),
+            TopUpOption(amount: '20'),
+            TopUpOption(amount: '50'),
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
@@ -76,6 +77,7 @@ class _TopUpPageState extends State<TopUpPage> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: TextFormField(
+                controller: amountController, // Use the controller
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'Enter Amount',
@@ -89,8 +91,9 @@ class _TopUpPageState extends State<TopUpPage> {
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Implement top-up functionality here
+                  onPressed: () async {
+                    // Pass the entered amount to makePayment
+                    await makePayment(amountController.text);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown,
@@ -114,9 +117,10 @@ class _TopUpPageState extends State<TopUpPage> {
     );
   }
 
-  Future<void> makePayment() async {
+  Future<void> makePayment(String amount) async {
     try {
-      paymentIntent = await createPaymentIntent('100', 'USD');
+      paymentIntent = await createPaymentIntent(amount, 'SGD');
+      print(paymentIntent);
 
       //STEP 2: Initialize Payment Sheet
       await Stripe.Stripe.instance
@@ -184,31 +188,118 @@ class _TopUpPageState extends State<TopUpPage> {
 
   createPaymentIntent(String amount, String currency) async {
     Map<String, dynamic> requestData = {
-      'ammount': amount,
+      'amount': double.parse(amount),
       'currency': currency,
     };
-    return await api.login(requestData);
+    return await api.initiateTopUp(requestData);
   }
 }
 
-class TopUpOption extends StatelessWidget {
+class TopUpOption extends StatefulWidget {
   final String amount;
 
   TopUpOption({required this.amount});
 
   @override
+  State<TopUpOption> createState() => _TopUpOptionState();
+}
+
+class _TopUpOptionState extends State<TopUpOption> {
+  API api = API('https://tikiwallet-backend.onrender.com');
+
+  Map<String, dynamic>? paymentIntent;
+
+  @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(
-        'Top Up $amount',
+        'Top Up \$${widget.amount}',
         style: TextStyle(
           fontSize: 16.0,
         ),
       ),
       trailing: Icon(Icons.arrow_forward_ios),
-      onTap: () {
+      onTap: () async {
         // Implement top-up functionality with this amount
+        await makePayment(widget.amount);
       },
     );
+  }
+
+  Future<void> makePayment(String amount) async {
+    try {
+      paymentIntent = await createPaymentIntent(amount, 'SGD');
+      print(paymentIntent);
+
+      //STEP 2: Initialize Payment Sheet
+      await Stripe.Stripe.instance
+          .initPaymentSheet(
+              paymentSheetParameters: Stripe.SetupPaymentSheetParameters(
+                  paymentIntentClientSecret: paymentIntent![
+                      'client_secret'], //Gotten from payment intent
+                  style: ThemeMode.dark,
+                  merchantDisplayName: 'Ikay'))
+          .then((value) {});
+
+      //STEP 3: Display Payment sheet
+      displayPaymentSheet();
+    } catch (err) {
+      throw Exception(err);
+    }
+  }
+
+  displayPaymentSheet() async {
+    try {
+      await Stripe.Stripe.instance.presentPaymentSheet().then((value) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 100.0,
+                      ),
+                      SizedBox(height: 10.0),
+                      Text("Payment Successful!"),
+                    ],
+                  ),
+                ));
+
+        paymentIntent = null;
+      }).onError((error, stackTrace) {
+        throw Exception(error);
+      });
+    } on Stripe.StripeException catch (e) {
+      print('Error is:---> $e');
+      AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: const [
+                Icon(
+                  Icons.cancel,
+                  color: Colors.red,
+                ),
+                Text("Payment Failed"),
+              ],
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      print('$e');
+    }
+  }
+
+  createPaymentIntent(String amount, String currency) async {
+    Map<String, dynamic> requestData = {
+      'amount': double.parse(amount),
+      'currency': currency,
+    };
+    return await api.initiateTopUp(requestData);
   }
 }
