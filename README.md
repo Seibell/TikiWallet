@@ -87,7 +87,7 @@ Authentication and session management is carried out using JSON Web Tokens.
 
 
 
-### <a name="topup-and-withdraw"></a>💳 Topups and Withdrawals
+### <a name="topup-and-withdrawal"></a>💳 Topups and Withdrawals
 Aim:
 - Utilize Stripe API to add funds from the user's bank to the wallet
 - Utilize Stripe API to retract funds from the user's wallet to the bank
