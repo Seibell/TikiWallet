@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:tiki_wallet/model/user.dart';
+import 'package:tiki_wallet/pay_screen.dart';
 import 'package:tiki_wallet/services/user_preferences.dart';
 import 'home_page.dart';
 import 'package:tiki_wallet/services/api.dart';
@@ -177,7 +178,7 @@ class _LoginViewState extends State<LoginView> {
         //Navigate to dashboard_view
 
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => MyHomePage(),
+          builder: (context) => HomeScreen(),
         ));
       },
     ));
