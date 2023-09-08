@@ -34,7 +34,7 @@ exports.initiateTopUp = async (req, res) => {
       paymentIntentData,
       {
         headers: {
-          'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`, // Replace with your Stripe secret key
+          'Authorization': `Bearer ${process.env.STRIPE_SECRETKEY}`, // Replace with your Stripe secret key
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       }
