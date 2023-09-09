@@ -61,9 +61,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         .API("https://tikiwallet-backend.onrender.com")
         .getAccount(id!);
 
+    onlineWalletBalance = await Future.any<double>([
+      Future.value(user.online_balance),
+      Future.delayed(Duration(seconds: 3), () => 0.0),
+    ]);
+
     setState(() {
       // fake values
-      onlineWalletBalance = user.online_balance;
       offlineWalletBalance = 200.75;
     });
   }
