@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'nfc_handler.dart';
+import 'package:tiki_wallet/receive_money_page.dart';
+import 'wifi_direct_transaction_page.dart';
 import 'transaction.dart';
-import 'nfc_page.dart';
 
 class OfflinePaymentPage extends StatelessWidget {
   final double accountBalance;
@@ -15,7 +15,6 @@ class OfflinePaymentPage extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
-  final NfcHandler _nfcHandler = NfcHandler();
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +68,6 @@ class OfflinePaymentPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
-                    // Creates transaction object with approved: False to be sent to NFC
                     Transaction transaction = Transaction(
                       senderPhoneNumber: int.parse(senderPhoneNumber),
                       receiverPhoneNumber: int.parse(_phoneController.text),
@@ -77,19 +75,12 @@ class OfflinePaymentPage extends StatelessWidget {
                       timestamp: DateTime.now(),
                     );
 
-                    // Writes the Transaction to the NFC card
-                    try {
-                      await _nfcHandler.writeTransactionToNfc(transaction);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Data written to NFC successfully')));
-
-                      Navigator.of(context).push(MaterialPageRoute(
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
                           builder: (context) =>
-                              NFCPage(transaction: transaction)));
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Error writing data to NFC: $e')));
-                    }
+                              WifiDirectPage(transaction: transaction)),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -97,6 +88,19 @@ class OfflinePaymentPage extends StatelessWidget {
                 ),
                 child: const Text('Send'),
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ReceiveMoneyOfflinePage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Receive')),
             ],
           ),
         ),
