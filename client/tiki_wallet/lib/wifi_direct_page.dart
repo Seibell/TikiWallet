@@ -1,12 +1,16 @@
-import 'dart:async';
+import 'dart:io';
+
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:flutter_p2p_connection/flutter_p2p_connection.dart';
 
 class WifiDirectPage extends StatefulWidget {
-  const WifiDirectPage({Key? key}) : super(key: key);
+  const WifiDirectPage({super.key});
 
   @override
-  _WifiDirectPageState createState() => _WifiDirectPageState();
+  State<WifiDirectPage> createState() => _WifiDirectPageState();
 }
 
 class _WifiDirectPageState extends State<WifiDirectPage>
@@ -17,8 +21,6 @@ class _WifiDirectPageState extends State<WifiDirectPage>
   WifiP2PInfo? wifiP2PInfo;
   StreamSubscription<WifiP2PInfo>? _streamWifiInfo;
   StreamSubscription<List<DiscoveredPeers>>? _streamPeers;
-  String? connectedDevice;
-  List<String> chatMessages = [];
 
   @override
   void initState() {
@@ -59,26 +61,30 @@ class _WifiDirectPageState extends State<WifiDirectPage>
     });
   }
 
-  Future connectToDevice(String deviceAddress) async {
-    if (connectedDevice == null) {
-      bool? connected =
-          await _flutterP2pConnectionPlugin.connect(deviceAddress);
-      if (connected) {
-        connectedDevice = deviceAddress;
-        snack("connected to $deviceAddress");
-        connectToSocket();
-      } else {
-        snack("failed to connect to $deviceAddress");
-      }
-    } else {
-      snack("already connected to $connectedDevice");
+  Future startSocket() async {
+    if (wifiP2PInfo != null) {
+      bool started = await _flutterP2pConnectionPlugin.startSocket(
+        groupOwnerAddress: wifiP2PInfo!.groupOwnerAddress,
+        downloadPath: "/storage/emulated/0/Download/",
+        maxConcurrentDownloads: 2,
+        deleteOnError: true,
+        onConnect: (name, address) {
+          snack("$name connected to socket with address: $address");
+        },
+        transferUpdate: (transfer) {
+          if (transfer.completed) {
+            snack(
+                "${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
+          }
+          print(
+              "ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
+        },
+        receiveString: (req) async {
+          snack(req);
+        },
+      );
+      snack("open socket: $started");
     }
-  }
-
-  void onMessageReceived(String msg) {
-    setState(() {
-      chatMessages.add(msg);
-    });
   }
 
   Future connectToSocket() async {
@@ -97,25 +103,53 @@ class _WifiDirectPageState extends State<WifiDirectPage>
             snack(
                 "${transfer.failed ? "failed to ${transfer.receiving ? "receive" : "send"}" : transfer.receiving ? "received" : "sent"}: ${transfer.filename}");
           }
+          print(
+              "ID: ${transfer.id}, FILENAME: ${transfer.filename}, PATH: ${transfer.path}, COUNT: ${transfer.count}, TOTAL: ${transfer.total}, COMPLETED: ${transfer.completed}, FAILED: ${transfer.failed}, RECEIVING: ${transfer.receiving}");
         },
         receiveString: (req) async {
-          onMessageReceived(req);
+          snack(req);
         },
       );
     }
   }
 
+  Future closeSocketConnection() async {
+    bool closed = _flutterP2pConnectionPlugin.closeSocket();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "closed: $closed",
+        ),
+      ),
+    );
+  }
+
   Future sendMessage() async {
-    try {
-      await _flutterP2pConnectionPlugin.sendStringToSocket(msgText.text);
-      setState(() {
-        chatMessages
-            .add(msgText.text); // Add sent message to the chatMessages list
-      });
-      msgText.clear(); // Clear the text field
-    } catch (e) {
-      snack('Error sending message: $e');
-    }
+    _flutterP2pConnectionPlugin.sendStringToSocket(msgText.text);
+  }
+
+  Future sendFile(bool phone) async {
+    String? filePath = await FilesystemPicker.open(
+      context: context,
+      rootDirectory: Directory(phone ? "/storage/emulated/0/" : "/storage/"),
+      fsType: FilesystemType.file,
+      fileTileSelectMode: FileTileSelectMode.wholeTile,
+      showGoUp: true,
+      folderIconColor: Colors.blue,
+    );
+    if (filePath == null) return;
+    List<TransferUpdate>? updates =
+        await _flutterP2pConnectionPlugin.sendFiletoSocket(
+      [
+        filePath,
+        // "/storage/emulated/0/Download/Likee_7100105253123033459.mp4",
+        // "/storage/0E64-4628/Download/Adele-Set-Fire-To-The-Rain-via-Naijafinix.com_.mp3",
+        // "/storage/0E64-4628/Flutter SDK/p2p_plugin.apk",
+        // "/storage/emulated/0/Download/03 Omah Lay - Godly (NetNaija.com).mp3",
+        // "/storage/0E64-4628/Download/Adele-Set-Fire-To-The-Rain-via-Naijafinix.com_.mp3",
+      ],
+    );
+    print(updates);
   }
 
   void snack(String msg) async {
@@ -224,26 +258,156 @@ class _WifiDirectPageState extends State<WifiDirectPage>
                 ),
               ),
             ),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: chatMessages.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(chatMessages[index]),
+            ElevatedButton(
+              onPressed: () async {
+                snack((await _flutterP2pConnectionPlugin.checkLocationEnabled())
+                    ? "enabled"
+                    : "diabled");
+              },
+              child: const Text("check location enabled"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                snack((await _flutterP2pConnectionPlugin.checkWifiEnabled())
+                    ? "enabled"
+                    : "diabled");
+              },
+              child: const Text("check wifi enabled"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                print(
+                    await _flutterP2pConnectionPlugin.askLocationPermission());
+              },
+              child: const Text("ask location permission"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                print(await _flutterP2pConnectionPlugin.askStoragePermission());
+              },
+              child: const Text("ask storage permission"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                print(
+                    await _flutterP2pConnectionPlugin.enableLocationServices());
+              },
+              child: const Text("enable location"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                print(await _flutterP2pConnectionPlugin.enableWifiServices());
+              },
+              child: const Text("enable wifi"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                bool? created = await _flutterP2pConnectionPlugin.createGroup();
+                snack("created group: $created");
+              },
+              child: const Text("create group"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                bool? removed = await _flutterP2pConnectionPlugin.removeGroup();
+                snack("removed group: $removed");
+              },
+              child: const Text("remove group/disconnect"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                var info = await _flutterP2pConnectionPlugin.groupInfo();
+                showDialog(
+                  context: context,
+                  builder: (context) => Center(
+                    child: Dialog(
+                      child: SizedBox(
+                        height: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  "groupNetworkName: ${info?.groupNetworkName}"),
+                              Text("passPhrase: ${info?.passPhrase}"),
+                              Text("isGroupOwner: ${info?.isGroupOwner}"),
+                              Text("clients: ${info?.clients}"),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 );
               },
+              child: const Text("get group info"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                String? ip = await _flutterP2pConnectionPlugin.getIPAddress();
+                snack("ip: $ip");
+              },
+              child: const Text("get ip"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                bool? discovering =
+                    await _flutterP2pConnectionPlugin.discover();
+                snack("discovering $discovering");
+              },
+              child: const Text("discover"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                bool? stopped =
+                    await _flutterP2pConnectionPlugin.stopDiscovery();
+                snack("stopped discovering $stopped");
+              },
+              child: const Text("stop discovery"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                startSocket();
+              },
+              child: const Text("open a socket"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                connectToSocket();
+              },
+              child: const Text("connect to socket"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                closeSocketConnection();
+              },
+              child: const Text("close socket"),
             ),
             TextField(
               controller: msgText,
               decoration: const InputDecoration(
-                hintText: "Enter message",
+                hintText: "message",
               ),
             ),
             ElevatedButton(
               onPressed: () async {
                 sendMessage();
               },
-              child: const Text("Send Message"),
+              child: const Text("send msg"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                sendFile(true);
+              },
+              child: const Text("send File from phone"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                sendFile(false);
+              },
+              child: const Text("send File"),
             ),
           ],
         ),
