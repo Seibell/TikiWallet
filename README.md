@@ -1,6 +1,6 @@
 # TikiWallet
-E-wallet with offline transaction support for Tiktok hackathon 2023
-No internet? No problem.
+<img width="1438" src="https://github.com/Seibell/TikiWallet/blob/main/Capture.PNG">
+E-wallet with offline transaction support for Tiktok hackathon 2023.
 
 ## 𝌞 Table of Contents
 - [About](#about)
