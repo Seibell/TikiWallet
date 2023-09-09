@@ -1,5 +1,6 @@
 # TikiWallet
 E-wallet with offline transaction support for Tiktok hackathon 2023
+No internet? No problem.
 
 ## 𝌞 Table of Contents
 - [About](#about)
@@ -22,11 +23,11 @@ Problem statement 4:
 How can new technologies in digital wallets enable new and trustworthy user experiences?
 
 ### <a name="motivation"></a>💡 Motivation
-With the advancement of technology, underserved regions or areas have trouble keeping up with the latest trends such as the lack of a stable WiFi connection. For financial inclusivity, TikiWallet enables transactions between users with no WiFi connections at all.
+With the advancement of technology, underserved regions or areas have trouble keeping up with the latest trends such as the lack of a stable internet connection. For financial inclusivity, TikiWallet enables transactions between users with no internet connections at all.
 
 ### <a name="target-audience"></a>🧑 Target Audience
 - The general public
-- People with no access to a stable WiFi or mobile data connection on the go
+- People with no access to a stable internet or mobile data connection on the go
 
 ### <a name="value-proposition"></a>❗ Value Proposition
 TikiWallet partitions your wallet into 2 wallets - online and offline.
@@ -86,20 +87,37 @@ Authentication and session management is carried out using JSON Web Tokens.
 - Prevents security threats like Cross-Site Request Forgery and Cross-site Scripting
 
 
-
 ### <a name="topup-and-withdrawal"></a>💳 Topups and Withdrawals
 Aim:
 - Utilize Stripe API to add funds from the user's bank to the wallet
 - Utilize Stripe API to retract funds from the user's wallet to the bank
 
+
+
 ###  <a name="online-wallet"></a>📶 Online Wallet
 Aim:
 - Transfer of funds between users over the internet
+
+*Online transfer:*
+- Calls the REST API from the backend server to transfer funds to the target user
+- Authorization bearer middleware using JWT required to identify the requestor before sending a request
 
 ###  <a name="offline-wallet"></a>📂 Offline Wallet
 Aim:
 - Transfer of funds between users without internet access
 - Physical contact between users to ensure authentication and security
+- Utilize WiFi-Direct technology to enable secure transfers offline
+
+*WiFi-Direct:*
+- Uses device and service discovery protocols
+- Allows devices to search and discover nearby WiFi-enabled devices without the need of WiFi
+- Requires devices to be WiFi-capable as it creates a wireless network between devices without an existing router.
+
+![WifiDirect](/lib/wifidirect.jpg)
+
+*Security and identity:*
+- Sender inputs the receiving phone number and receiver inputs the sending phone number to verify the identity of the transaction
+- Handshake between the 2 devices to exchange and verify contact info before executing the transaction of funds
 
 
 ## Roadmap for Scalability and Availability
