@@ -43,6 +43,8 @@ dependencies:
     http: ^1.1.0
     shared_preferences: ^2.2.1
     flutter_stripe: ^9.4.0
+    flutter_p2p_connection: ^2.0.1
+    filesystem_picker: ^3.1.0
 
 flutter_native_splash:
     color: "#FFFFFF" # black background

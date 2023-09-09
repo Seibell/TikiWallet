@@ -16,6 +16,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  User? user;
   int _currentIndex = 0;
   double? onlineWalletBalance; //populated by some API call
   double? offlineWalletBalance; //populated by some API call
@@ -44,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             MaterialPageRoute(
                 builder: (context) => OfflinePaymentPage(
                     accountBalance: offlineWalletBalance!,
-                    senderPhoneNumber: "12345678")),
+                    senderPhoneNumber: user!.phone_number.toString())),
           );
         }
       } else {
@@ -57,12 +58,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     // fake api call
     print("Fetching wallet balance");
     int? id = UserPreferences.getAccountID();
-    User user = await controller
+    user = await controller
         .API("https://tikiwallet-backend.onrender.com")
         .getAccount(id!);
 
     onlineWalletBalance = await Future.any<double>([
-      Future.value(user.online_balance),
+      Future.value(user!.online_balance),
       Future.delayed(Duration(seconds: 3), () => 0.0),
     ]);
 
