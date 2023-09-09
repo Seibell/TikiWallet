@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserPreferences {
   static late SharedPreferences _preferences;
 
+  static const _keyAccountID = 'accountID';
   static const _keyContact = 'contact';
   static const _keyUsername = 'username';
   static const _keyToken = 'token';
@@ -10,10 +11,15 @@ class UserPreferences {
   static Future init() async =>
       _preferences = await SharedPreferences.getInstance();
 
-  static Future setContact(String contact) async =>
-      await _preferences.setString(_keyContact, contact);
+  static Future setAccountID(int accountID) async =>
+      await _preferences.setInt(_keyAccountID, accountID);
 
-  static String? getContact() => _preferences.getString(_keyContact);
+  static int? getAccountID() => _preferences.getInt(_keyAccountID);
+
+  static Future setContact(int contact) async =>
+      await _preferences.setInt(_keyContact, contact);
+
+  static int? getContact() => _preferences.getInt(_keyContact);
 
   static Future setUsername(String username) async =>
       await _preferences.setString(_keyUsername, username);

@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:tiki_wallet/model/user.dart';
+import 'package:tiki_wallet/transaction.dart';
 
 class API {
   final String baseUrl;
@@ -7,16 +10,15 @@ class API {
   API(this.baseUrl);
 
   // Account routes
-  Future<Map<String, dynamic>> getAccount(int id) async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/account/$id'));
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        return {'error': 'Failed to load account'};
-      }
-    } catch (e) {
-      return {'error': e.toString()};
+  Future<User> getAccount(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/account/$id'));
+    if (response.statusCode == 200) {
+      return User.fromJson(json.decode(response.body));
+    } else {
+      const Dialog(
+        child: Text("Network Error Occured"),
+      );
+      throw Exception("User not found");
     }
   }
 
@@ -168,23 +170,55 @@ class API {
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
+        const Dialog(
+          child: Text("Transaction successful"),
+        );
         return json.decode(response.body);
       } else {
+        Dialog(
+          child: Text(json.decode(response.body)["message"]),
+        );
         return {'error': 'Failed to transfer online'};
       }
     } catch (e) {
+      const Dialog(
+        child: Text("Network Error"),
+      );
       return {'error': e.toString()};
     }
   }
 
-  Future<Map<String, dynamic>> getTransactions(int accountId) async {
+  Future<List<Transaction>> getTransactions(int accountId) async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/transaction/getTransactions/$accountId'));
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+      List<Transaction> incomingtransactions = data["incomingTransactions"]
+          .map((transaction) => Transaction.fromJson(transaction));
+      List<Transaction> outgoingtransactions = data["outgoingTransactions"]
+          .map((transaction) => Transaction.fromJson(transaction));
+      List<Transaction> result = List.from(incomingtransactions)
+        ..addAll(outgoingtransactions);
+      return result;
+    } else {
+      const Dialog(
+        child: Text("Network Error Occured"),
+      );
+      throw Exception("Network Error");
+    }
+  }
+
+  Future<Map<String, dynamic>> initiateTopUp(Map<String, dynamic> data) async {
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/transaction/getTransactions/$accountId'));
+      final response = await http.post(
+        Uri.parse('$baseUrl/transaction/initiateTopUp'),
+        body: json.encode(data),
+        headers: {'Content-Type': 'application/json'},
+      );
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        return {'error': 'Failed to get transactions'};
+        return {'error': 'Failed to topup'};
       }
     } catch (e) {
       return {'error': e.toString()};

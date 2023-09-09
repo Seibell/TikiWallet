@@ -1,7 +1,7 @@
 class Transaction {
   int? id;
-  String senderPhoneNumber;
-  String receiverPhoneNumber;
+  int senderPhoneNumber;
+  int receiverPhoneNumber;
   double amount;
   DateTime timestamp;
 

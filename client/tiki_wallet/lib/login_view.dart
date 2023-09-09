@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:tiki_wallet/model/user.dart';
+import 'package:tiki_wallet/services/user_preferences.dart';
 import 'home_page.dart';
 import 'package:tiki_wallet/services/api.dart';
 
@@ -15,7 +17,7 @@ class _LoginViewState extends State<LoginView> {
 
   var accesscode = '';
 
-  API api = API('https://tikiwallet-backend.onrender.com/');
+  API api = API('https://tikiwallet-backend.onrender.com');
 
   bool signup = false;
 
@@ -30,28 +32,21 @@ class _LoginViewState extends State<LoginView> {
 
       // Create a data map to send in the request
       Map<String, dynamic> requestData = {
-        'phonenumber': name,
+        'phoneNumber': int.parse(name),
         'password': password,
       };
-      try {
-        var verificationResponse = await api.login(requestData);
-        if (verificationResponse.containsKey('error')) {
-          return 'Login Failed: ${verificationResponse['error']}';
-        } else {
-          // Register User
-          var name = data.name;
-          var password = data.password;
-
-          // Create a data map to send in the request
-          Map<String, dynamic> requestData = {
-            'phonenumber': name,
-            'password': password,
-          };
-          api.register(requestData);
-          return null;
-        }
-      } catch (e) {
-        return 'Login Failed: ${e.toString()}';
+      var verificationResponse = await api.login(requestData);
+      if (verificationResponse.containsKey('error')) {
+        return '${verificationResponse['error']}';
+      } else {
+        var token = verificationResponse['token'];
+        User user = User.fromJson(verificationResponse['user']);
+        UserPreferences.setToken(token);
+        UserPreferences.setAccountID(user.id);
+        UserPreferences.setContact(user.phone_number);
+        UserPreferences.setUsername(user.username);
+        // Use token if needed
+        return null;
       }
     });
   }
@@ -63,26 +58,41 @@ class _LoginViewState extends State<LoginView> {
       // Return string if fail sign up
       // Return null if successfully signed up
       // Check if otp is correct
+      print('Registered');
       if (data.additionalSignupData != null) {
-        var otp = data.additionalSignupData!['otp'];
-        Map<String, dynamic> otpData = {'otp': otp};
+        int otp = int.parse(data.additionalSignupData!['OTP']!);
+        print(otp);
+        Map<String, dynamic> otpData = {
+          "otp": otp,
+          "phoneNumber": int.parse(data.name!)
+        };
         try {
           var verificationResponse = await api.verify(otpData);
+          print(verificationResponse);
 
           if (verificationResponse.containsKey('error')) {
             return 'Failed to verify OTP: ${verificationResponse['error']}';
           } else {
             // Register User
-            var name = data.name;
+            var phonenumber = data.name;
             var password = data.password;
+            var username = data.additionalSignupData!['username'];
 
             // Create a data map to send in the request
             Map<String, dynamic> requestData = {
-              'phonenumber': name,
-              'password': password,
+              "phoneNumber": int.parse(phonenumber!),
+              "password": password,
+              "username": username
             };
-            api.register(requestData);
-            return null;
+            var response = await api.register(requestData);
+            var token = response['token'];
+            // Do smth with token. store in shared preferences
+            print(token);
+            if (response.containsKey('error')) {
+              return '${response['error']}';
+            } else {
+              return null;
+            }
           }
         } catch (e) {
           // Handle any exceptions that occur during verification
@@ -96,13 +106,14 @@ class _LoginViewState extends State<LoginView> {
   Future<String?> _genOTP(SignupData data) async {
     // Check for whether phone number has been registered
     return Future.delayed(loginTime).then((_) async {
+      print(data);
       // Use sign up data to generate OTP
       var name = data.name;
       var password = data.password;
 
       // Create a data map to send in the request
       Map<String, dynamic> requestData = {
-        'phonenumber': name,
+        'phoneNumber': int.parse(name!),
         'password': password,
       };
 
@@ -147,6 +158,10 @@ class _LoginViewState extends State<LoginView> {
       onSwitchToAdditionalFields: _genOTP,
       additionalSignupFields: [
         // Additional sign up fields if needed
+        UserFormField(
+            keyName: 'username',
+            displayName: 'Username',
+            icon: Icon(Icons.person_2_rounded)),
         UserFormField(
             keyName: 'OTP', displayName: 'OTP', icon: Icon(Icons.lock))
       ],
